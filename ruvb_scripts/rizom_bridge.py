@@ -135,7 +135,7 @@ def from_rizom():
     lx.eval('select.drop item')
 
     # Copy UVs from the imported meshes to the original meshes, uses the rizomtemp suffix to identify the correct mesh pairs
-    
+
     for mesh in new_meshes:
         lx.eval('select.Item {%s} mode:add' % mesh)
 
@@ -144,7 +144,7 @@ def from_rizom():
 
     for mesh in imported_sel:
         mesh_names.append(lx.eval('query sceneservice item.name ? {%s}' % mesh))
-    
+
     for mesh in mesh_names:
         for uvmap in uvmap_name:
             lx.eval('select.Item {%s}' % mesh + '_rizomtemp')
