@@ -10,13 +10,56 @@ import lx
 import ruvb_scripts.utilities as utilities
 
 
-####### User value #######
-
-RIZOM_PATH = r'C:\Program Files\Rizom Lab\RizomUV VS RS 2018.0\rizomuv.exe'  # Set path to RizomUV executable
-
-#######
-
 EXPORTED_FILE = tempfile.gettempdir() + os.sep + 'rizom_temp.fbx'
+
+
+def rizom_path_update():
+    """Allows the user to set a new path to the RizomUV executable"""
+
+    if lx.eval('!!query scriptsysservice userValue.isDefined ? coh.rizom_path'):
+        lx.eval('dialog.setup style:fileOpen')
+        lx.eval('dialog.title {Select the RizomUV executable}')
+        lx.eval('dialog.msg {Navigate to and select the RizomUV executable in your Rizom instal directory.}')
+        lx.eval('dialog.open')
+        rizom_exe = lx.eval('dialog.result ?')
+        lx.eval('!!user.value coh.rizom_path {%s}' % rizom_exe)
+
+    else:
+        lx.eval('!!user.defNew name:coh.rizom_path type:string life:config')
+        lx.eval('dialog.setup style:fileOpen')
+        lx.eval('dialog.title {Select the RizomUV executable}')
+        lx.eval('dialog.msg {Navigate to and select the RizomUV executable in your Rizom instal directory.}')
+        lx.eval('dialog.open')
+        rizom_exe = lx.eval('dialog.result ?')
+        lx.eval('!!user.value coh.rizom_path {%s}' % rizom_exe)
+
+
+def rizom_path_check():
+    """prompts the user to set the path to rizomuv if it is not saved in the config already"""
+
+    if lx.eval('!!query scriptsysservice userValue.isDefined ? coh.rizom_path'):
+        pass
+
+    else:
+        lx.eval('!!user.defNew name:coh.rizom_path type:string life:config')
+        lx.eval('dialog.setup style:fileOpen')
+        lx.eval('dialog.title {Select the RizomUV executable}')
+        lx.eval('dialog.msg {Navigate to and select the RizomUV executable in your Rizom instal directory.}')
+        lx.eval('dialog.open')
+        rizom_exe = lx.eval('dialog.result ?')
+        lx.eval('!!user.value coh.rizom_path {%s}' % rizom_exe)
+
+
+def export_settings():
+    """Set the FBX export settings for exporting to rizom"""
+
+    lx.eval('user.value sceneio.fbx.save.format FBXLATEST')
+    lx.eval('user.value sceneio.fbx.save.exportType FBXExportSelection')
+    lx.eval('user.value sceneio.fbx.save.geometry true')
+    lx.eval('user.value sceneio.fbx.save.materials true')
+    lx.eval('user.value sceneio.fbx.save.lights false')
+    lx.eval('user.value sceneio.fbx.save.cameras false')
+    lx.eval('user.value sceneio.fbx.save.smoothingGroups true')
 
 
 def to_rizom(self):
@@ -24,6 +67,10 @@ def to_rizom(self):
 
     # adds string argument to command for the option to disable or enable selection set materials
     selection_sets_enabled = self.dyna_String(0, "")
+
+    rizom_path_check()
+
+    rizomuv_path = lx.eval('!!user.value coh.rizom_path ?')
 
     # Store the selected meshes
     sel_layers = lx.evalN('query sceneservice selection ? all')
@@ -33,14 +80,7 @@ def to_rizom(self):
 
     # Apply temporary materials to each polygon selection set for easy isolation in Rizom
     if selection_sets_enabled == 'ss':
-        num_polset = lx.eval('query layerservice polset.N ? all')
-        for polyset in range(num_polset):
-            polset_name = lx.eval('query layerservice polset.name ? %s' % polyset)
-            lx.eval('select.drop polygon')
-            lx.eval('select.useSet {%s} select' % polset_name)
-            lx.eval('poly.setMaterial {%s} {0.5 0.5 0.5} 0.8 0.2 true false false' % polset_name)
-            lx.eval('select.drop polygon')
-
+        utilities.assign_polyset_materials()
 
     # Store the user FBX settings
     fbx_values = utilities.remember_fbx_settings()
@@ -61,26 +101,24 @@ def to_rizom(self):
         lx.eval('select.subItem %s add' % mesh)
 
     # Set export settings
-    lx.eval('user.value sceneio.fbx.save.format FBXLATEST')
-    lx.eval('user.value sceneio.fbx.save.exportType FBXExportSelection')
-    lx.eval('user.value sceneio.fbx.save.geometry true')
-    lx.eval('user.value sceneio.fbx.save.materials true')
-    lx.eval('user.value sceneio.fbx.save.lights false')
-    lx.eval('user.value sceneio.fbx.save.cameras false')
-    lx.eval('user.value sceneio.fbx.save.smoothingGroups true')
+    export_settings()
 
     # Export the meshes to RizomUV
     lx.eval('scene.saveAs "%s" fbx true' % EXPORTED_FILE)
 
     try:
-        cmd = '"' + RIZOM_PATH + '" "' + EXPORTED_FILE + '"'
+        cmd = '"' + rizomuv_path + '" "' + EXPORTED_FILE + '"'
         if platform.system() == 'Windows':
             subprocess.Popen(cmd)
         else:
-            subprocess.Popen(['open', '-a', RIZOM_PATH, '--args', EXPORTED_FILE])
+            subprocess.Popen(['open', '-a', rizomuv_path, '--args', EXPORTED_FILE])
 
     except WindowsError:
-        lx.out('Invalid path to RizomUV application')
+        lx.eval('dialog.setup style:Error')
+        lx.eval('dialog.title {Invalid excecutable path}')
+        lx.eval('dialog.msg {There is a problem with your selected path, please make sure it is correct.}')
+        lx.eval('dialog.open')
+        lx.eval('!!user.value coh.rizom_path ""')
 
     # Restore the user FBX settings
     utilities.restore_fbx_settings(fbx_values)

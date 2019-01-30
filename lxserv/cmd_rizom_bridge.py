@@ -70,3 +70,27 @@ class From_Rizom(lxu.command.BasicCommand):
 
 
 lx.bless(From_Rizom, "coh.fromRizom")
+
+
+class Rizom_Path(lxu.command.BasicCommand):
+    def __init__(self):
+        lxu.command.BasicCommand.__init__(self)
+
+    def cmd_Flags(self):
+        return lx.symbol.fCMD_MODEL | lx.symbol.fCMD_UNDO
+
+    def basic_Enable(self, msg):
+        return True
+
+    def cmd_Interact(self):
+        pass
+
+    def basic_Execute(self, msg, flags):
+        reload(ruvb_scripts)
+        ruvb_scripts.rizom_bridge.rizom_path_update()
+
+    def cmd_Query(self, index, vaQuery):
+        lx.notimpl()
+
+
+lx.bless(Rizom_Path, "coh.rizomPath")

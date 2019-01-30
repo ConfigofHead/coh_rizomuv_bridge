@@ -116,3 +116,15 @@ def store_selected_uvmap():
         else:
             pass
     return uvmap_names
+
+
+def assign_polyset_materials():
+    """Assign unique materials to every polygon selection set"""
+
+    num_polset = lx.eval('query layerservice polset.N ? all')
+    for polyset in range(num_polset):
+        polset_name = lx.eval('query layerservice polset.name ? %s' % polyset)
+        lx.eval('select.drop polygon')
+        lx.eval('select.useSet {%s} select' % polset_name)
+        lx.eval('poly.setMaterial {%s} {0.5 0.5 0.5} 0.8 0.2 true false false' % polset_name)
+        lx.eval('select.drop polygon')
