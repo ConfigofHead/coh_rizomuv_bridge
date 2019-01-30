@@ -25,6 +25,8 @@ import ruvb_scripts
 class To_Rizom(lxu.command.BasicCommand):
     def __init__(self):
         lxu.command.BasicCommand.__init__(self)
+        self.dyna_Add('selection_sets_enabled', lx.symbol.sTYPE_STRING)
+        self.basic_SetFlags(0, lx.symbol.fCMDARG_OPTIONAL)
 
     def cmd_Flags(self):
         return lx.symbol.fCMD_MODEL | lx.symbol.fCMD_UNDO
@@ -37,13 +39,14 @@ class To_Rizom(lxu.command.BasicCommand):
 
     def basic_Execute(self, msg, flags):
         reload(ruvb_scripts)
-        ruvb_scripts.rizom_bridge.to_rizom()
+        ruvb_scripts.rizom_bridge.to_rizom(self)
 
     def cmd_Query(self, index, vaQuery):
         lx.notimpl()
 
 
 lx.bless(To_Rizom, "coh.toRizom")
+
 
 class From_Rizom(lxu.command.BasicCommand):
     def __init__(self):

@@ -19,8 +19,11 @@ RIZOM_PATH = r'C:\Program Files\Rizom Lab\RizomUV VS RS 2018.0\rizomuv.exe'  # S
 EXPORTED_FILE = tempfile.gettempdir() + os.sep + 'rizom_temp.fbx'
 
 
-def to_rizom():
+def to_rizom(self):
     """Export the selected meshes to a temporary directory"""
+
+    # adds string argument to command for the option to disable or enable selection set materials
+    selection_sets_enabled = self.dyna_String(0, "")
 
     # Store the selected meshes
     sel_layers = lx.evalN('query sceneservice selection ? all')
@@ -29,13 +32,15 @@ def to_rizom():
     shader_list = utilities.store_scene_masks()
 
     # Apply temporary materials to each polygon selection set for easy isolation in Rizom
-    num_polset = lx.eval('query layerservice polset.N ? all')
-    for polyset in range(num_polset):
-        polset_name = lx.eval('query layerservice polset.name ? %s' % polyset)
-        lx.eval('select.drop polygon')
-        lx.eval('select.useSet {%s} select' % polset_name)
-        lx.eval('poly.setMaterial {%s} {0.5 0.5 0.5} 0.8 0.2 true false false' % polset_name)
-        lx.eval('select.drop polygon')
+    if selection_sets_enabled == 'ss':
+        num_polset = lx.eval('query layerservice polset.N ? all')
+        for polyset in range(num_polset):
+            polset_name = lx.eval('query layerservice polset.name ? %s' % polyset)
+            lx.eval('select.drop polygon')
+            lx.eval('select.useSet {%s} select' % polset_name)
+            lx.eval('poly.setMaterial {%s} {0.5 0.5 0.5} 0.8 0.2 true false false' % polset_name)
+            lx.eval('select.drop polygon')
+
 
     # Store the user FBX settings
     fbx_values = utilities.remember_fbx_settings()
