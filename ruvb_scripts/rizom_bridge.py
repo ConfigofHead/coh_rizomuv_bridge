@@ -2,6 +2,7 @@
 
 """Bridge between Modo and RizomUV"""
 
+import sys
 import tempfile
 import os
 import subprocess
@@ -16,38 +17,48 @@ EXPORTED_FILE = tempfile.gettempdir() + os.sep + 'rizom_temp.fbx'
 def rizom_path_update():
     """Allows the user to set a new path to the RizomUV executable"""
 
-    if lx.eval('!!query scriptsysservice userValue.isDefined ? coh.rizom_path'):
-        lx.eval('dialog.setup style:fileOpen')
-        lx.eval('dialog.title {Select the RizomUV executable}')
-        lx.eval('dialog.msg {Navigate to and select the RizomUV executable in your Rizom instal directory.}')
-        lx.eval('dialog.open')
-        rizom_exe = lx.eval('dialog.result ?')
-        lx.eval('!!user.value coh.rizom_path {%s}' % rizom_exe)
+    try:
+        if lx.eval('!!query scriptsysservice userValue.isDefined ? coh.rizom_path'):
+            lx.eval('dialog.setup style:fileOpen')
+            lx.eval('dialog.title {Select the RizomUV executable}')
+            lx.eval('dialog.msg {Navigate to and select the RizomUV executable in your Rizom instal directory.}')
+            lx.eval('dialog.open')
+            rizom_exe = lx.eval('dialog.result ?')
+            lx.eval('!!user.value coh.rizom_path {%s}' % rizom_exe)
 
-    else:
-        lx.eval('!!user.defNew name:coh.rizom_path type:string life:config')
-        lx.eval('dialog.setup style:fileOpen')
-        lx.eval('dialog.title {Select the RizomUV executable}')
-        lx.eval('dialog.msg {Navigate to and select the RizomUV executable in your Rizom instal directory.}')
-        lx.eval('dialog.open')
-        rizom_exe = lx.eval('dialog.result ?')
-        lx.eval('!!user.value coh.rizom_path {%s}' % rizom_exe)
+        else:
+            lx.eval('!!user.defNew name:coh.rizom_path type:string life:config')
+            lx.eval('dialog.setup style:fileOpen')
+            lx.eval('dialog.title {Select the RizomUV executable}')
+            lx.eval('dialog.msg {Navigate to and select the RizomUV executable in your Rizom instal directory.}')
+            lx.eval('dialog.open')
+            rizom_exe = lx.eval('dialog.result ?')
+            lx.eval('!!user.value coh.rizom_path {%s}' % rizom_exe)
+
+    except RuntimeError:
+        lx.eval('user.defDelete coh.rizom_path')
+        sys.exit()
 
 
 def rizom_path_check():
     """prompts the user to set the path to rizomuv if it is not saved in the config already"""
 
-    if lx.eval('!!query scriptsysservice userValue.isDefined ? coh.rizom_path'):
-        pass
+    try:
+        if lx.eval('!!query scriptsysservice userValue.isDefined ? coh.rizom_path'):
+            pass
 
-    else:
-        lx.eval('!!user.defNew name:coh.rizom_path type:string life:config')
-        lx.eval('dialog.setup style:fileOpen')
-        lx.eval('dialog.title {Select the RizomUV executable}')
-        lx.eval('dialog.msg {Navigate to and select the RizomUV executable in your Rizom instal directory.}')
-        lx.eval('dialog.open')
-        rizom_exe = lx.eval('dialog.result ?')
-        lx.eval('!!user.value coh.rizom_path {%s}' % rizom_exe)
+        else:
+            lx.eval('!!user.defNew name:coh.rizom_path type:string life:config')
+            lx.eval('dialog.setup style:fileOpen')
+            lx.eval('dialog.title {Select the RizomUV executable}')
+            lx.eval('dialog.msg {Navigate to and select the RizomUV executable in your Rizom instal directory.}')
+            lx.eval('dialog.open')
+            rizom_exe = lx.eval('dialog.result ?')
+            lx.eval('!!user.value coh.rizom_path {%s}' % rizom_exe)
+
+    except RuntimeError:
+        lx.eval('user.defDelete coh.rizom_path')
+        sys.exit()
 
 
 def export_settings():
@@ -119,6 +130,8 @@ def to_rizom(self):
         lx.eval('dialog.msg {There is a problem with your selected path, please make sure it is correct.}')
         lx.eval('dialog.open')
         lx.eval('!!user.value coh.rizom_path ""')
+        lx.eval('user.defDelete coh.rizom_path')
+        sys.exit()
 
     # Restore the user FBX settings
     utilities.restore_fbx_settings(fbx_values)
