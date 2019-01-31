@@ -70,6 +70,31 @@ def export_settings():
     lx.eval('user.value sceneio.fbx.save.lights false')
     lx.eval('user.value sceneio.fbx.save.cameras false')
     lx.eval('user.value sceneio.fbx.save.smoothingGroups true')
+    lx.eval('user.value sceneio.fbx.save.selectionSets false')
+
+
+def assign_polyset_materials():
+    """Assign unique materials to every polygon selection set"""
+
+    num_polset = lx.eval('query layerservice polset.N ? selected')
+    for polyset in range(num_polset):
+        polset_name = lx.eval('query layerservice polset.name ? %s' % polyset)
+        lx.eval('select.drop polygon')
+        lx.eval('select.useSet {%s} select' % polset_name)
+        lx.eval('poly.setMaterial {%s} {0.5 0.5 0.5} 0.8 0.2 true false false' % polset_name)
+        lx.eval('select.drop polygon')
+
+
+def delete_polyset_material_tags():
+    """Delete the left over tags from the 'assign_polyset_materials' function"""
+
+    sel_mesh = lx.evalN('query sceneservice selection ? all')
+    num_polset = lx.eval('query layerservice polset.N ? selected')
+
+    for polyset in range(num_polset):
+        polset_name = lx.eval('query layerservice polset.name ? %s' % polyset)
+        for _ in sel_mesh:
+            lx.eval('poly.renameTag {%s} {} MATR' % polset_name)
 
 
 def to_rizom():
@@ -82,12 +107,11 @@ def to_rizom():
     # Store the selected meshes
     sel_layers = lx.evalN('query sceneservice selection ? all')
 
-    # Store all material masks in the scene
+    # Get list of shader masks in the scene
     shader_list = utilities.store_scene_masks()
 
     # Apply temporary materials to each polygon selection set for easy isolation in Rizom
-    if lx.eval('!!user.value coh.polysets_toggle ?') == 'on':
-        utilities.assign_polyset_materials()
+    assign_polyset_materials()
 
     # Store the user FBX settings
     fbx_values = utilities.remember_fbx_settings()
@@ -132,6 +156,8 @@ def to_rizom():
     # Restore the user FBX settings
     utilities.restore_fbx_settings(fbx_values)
 
+    delete_polyset_material_tags()
+
     # Get the material masks in the scene now that the temp materials have been applied and exported
     new_shader_list = utilities.store_scene_masks()
 
@@ -139,7 +165,6 @@ def to_rizom():
 
     # Find and delete the temporary materials by getting the difference between the lists of masks
     new_shader_list = [shader for shader in new_shader_list if shader not in shader_list]
-
     for mask in new_shader_list:
         lx.eval('select.item {%s} mode:add' % mask)
 
