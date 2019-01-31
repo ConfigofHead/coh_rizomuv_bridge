@@ -107,13 +107,11 @@ def to_rizom():
     # Store the selected meshes
     sel_layers = lx.evalN('query sceneservice selection ? all')
 
-    # Get list of shader masks in the scene
     shader_list = utilities.store_scene_masks()
 
-    # Apply temporary materials to each polygon selection set for easy isolation in Rizom
-    assign_polyset_materials()
+    if lx.eval('!!user.value coh.polyset_toggle ?') == 'on':
+        assign_polyset_materials()
 
-    # Store the user FBX settings
     fbx_values = utilities.remember_fbx_settings()
 
     # Select the stored meshes
@@ -131,7 +129,6 @@ def to_rizom():
     for mesh in sel_layers:
         lx.eval('select.subItem %s add' % mesh)
 
-    # Set export settings
     export_settings()
 
     # Export the meshes to RizomUV
@@ -153,7 +150,6 @@ def to_rizom():
         lx.eval('user.defDelete coh.rizom_path')
         sys.exit()
 
-    # Restore the user FBX settings
     utilities.restore_fbx_settings(fbx_values)
 
     delete_polyset_material_tags()
@@ -188,19 +184,16 @@ def to_rizom():
 def from_rizom():
     """Import mesh from RizomUV and copy the UVs to original meshes"""
 
-    # Save selected mesh item
     sel_layers = lx.evalN('query sceneservice selection ? all')
 
     uvmap_name = utilities.store_selected_uvmap()
 
-    # Save a list of mesh items and groups
     original_meshes = utilities.store_scene_meshes()
     original_groups = utilities.store_scene_groups()
 
     lx.eval('loaderOptions.fbx false true false false false false false false false false false false false false false FBXAnimSampleRate_x1 1.0 defaultimport')
     lx.eval('!scene.open "%s" import' % EXPORTED_FILE)
 
-    # Save a new list of mesh items and groups
     new_meshes = []
     new_meshes = utilities.store_scene_meshes()
     new_groups = utilities.store_scene_groups()
