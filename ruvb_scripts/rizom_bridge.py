@@ -34,7 +34,8 @@ def rizom_path_update():
             lx.eval('!!user.value coh.rizom_path {%s}' % rizom_exe)
 
     except RuntimeError:
-        lx.eval('!!user.defDelete coh.rizom_path')
+        if lx.eval('!!query scriptsysservice userValue.isDefined ? coh.rizom_path'):
+            lx.eval('!!user.defDelete coh.rizom_path')
         sys.exit()
 
 
@@ -54,7 +55,8 @@ def rizom_path_check():
             lx.eval('!!user.value coh.rizom_path {%s}' % rizom_exe)
 
     except RuntimeError:
-        lx.eval('user.defDelete coh.rizom_path')
+        if lx.eval('!!query scriptsysservice userValue.isDefined ? coh.rizom_path'):
+            lx.eval('user.defDelete coh.rizom_path')
         sys.exit()
 
 
@@ -84,8 +86,8 @@ def to_rizom():
     shader_list = utilities.store_scene_masks()
 
     # Apply temporary materials to each polygon selection set for easy isolation in Rizom
-
-    utilities.assign_polyset_materials()
+    if lx.eval('!!user.value coh.polysets_toggle ?') == 'on':
+        utilities.assign_polyset_materials()
 
     # Store the user FBX settings
     fbx_values = utilities.remember_fbx_settings()
