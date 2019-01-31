@@ -20,23 +20,21 @@ def rizom_path_update():
     try:
         if lx.eval('!!query scriptsysservice userValue.isDefined ? coh.rizom_path'):
             lx.eval('dialog.setup style:fileOpen')
-            lx.eval('dialog.title {Select the RizomUV executable}')
-            lx.eval('dialog.msg {Navigate to and select the RizomUV executable in your Rizom instal directory.}')
+            lx.eval('!!dialog.title {Select the RizomUV executable}')
             lx.eval('dialog.open')
-            rizom_exe = lx.eval('dialog.result ?')
+            rizom_exe = lx.eval('!!dialog.result ?')
             lx.eval('!!user.value coh.rizom_path {%s}' % rizom_exe)
 
         else:
             lx.eval('!!user.defNew name:coh.rizom_path type:string life:config')
             lx.eval('dialog.setup style:fileOpen')
-            lx.eval('dialog.title {Select the RizomUV executable}')
-            lx.eval('dialog.msg {Navigate to and select the RizomUV executable in your Rizom instal directory.}')
+            lx.eval('!!dialog.title {Select the RizomUV executable}')
             lx.eval('dialog.open')
-            rizom_exe = lx.eval('dialog.result ?')
+            rizom_exe = lx.eval('!!dialog.result ?')
             lx.eval('!!user.value coh.rizom_path {%s}' % rizom_exe)
 
     except RuntimeError:
-        lx.eval('user.defDelete coh.rizom_path')
+        lx.eval('!!user.defDelete coh.rizom_path')
         sys.exit()
 
 
@@ -50,8 +48,7 @@ def rizom_path_check():
         else:
             lx.eval('!!user.defNew name:coh.rizom_path type:string life:config')
             lx.eval('dialog.setup style:fileOpen')
-            lx.eval('dialog.title {Select the RizomUV executable}')
-            lx.eval('dialog.msg {Navigate to and select the RizomUV executable in your Rizom instal directory.}')
+            lx.eval('!!dialog.title {Select the RizomUV executable}')
             lx.eval('dialog.open')
             rizom_exe = lx.eval('dialog.result ?')
             lx.eval('!!user.value coh.rizom_path {%s}' % rizom_exe)
@@ -73,11 +70,8 @@ def export_settings():
     lx.eval('user.value sceneio.fbx.save.smoothingGroups true')
 
 
-def to_rizom(self):
+def to_rizom():
     """Export the selected meshes to a temporary directory"""
-
-    # adds string argument to command for the option to disable or enable selection set materials
-    selection_sets_enabled = self.dyna_String(0, "")
 
     rizom_path_check()
 
@@ -90,8 +84,8 @@ def to_rizom(self):
     shader_list = utilities.store_scene_masks()
 
     # Apply temporary materials to each polygon selection set for easy isolation in Rizom
-    if selection_sets_enabled == 'ss':
-        utilities.assign_polyset_materials()
+
+    utilities.assign_polyset_materials()
 
     # Store the user FBX settings
     fbx_values = utilities.remember_fbx_settings()
