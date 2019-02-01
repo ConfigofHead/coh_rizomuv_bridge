@@ -64,7 +64,6 @@ def restore_fbx_settings(fbx_values):
     lx.eval('user.value sceneio.fbx.save.sampleAnimFpsMultiplier %s' % fbx_values[22])
     lx.eval('user.value sceneio.fbx.save.exportActionType %s' % fbx_values[23])
 
-
 def store_scene_masks():
     """Store the material masks currently in the scene"""
 
