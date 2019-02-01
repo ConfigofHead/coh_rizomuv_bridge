@@ -93,7 +93,7 @@ def delete_polyset_material_tags():
             lx.eval('poly.renameTag {%s} {} MATR' % polset_name)
 
 
-def store_sel_meshes():
+def store_check_meshes():
     """Store selected meshes, exit script if none selected"""
 
     sel_layers = lx.evalN('query sceneservice selection ? mesh')
@@ -115,7 +115,7 @@ def to_rizom():
         rizomuv_path = lx.eval('!!user.value coh.rizom_path ?')
 
         # Store the selected meshes
-        sel_layers = store_sel_meshes()
+        sel_layers = store_check_meshes()
 
         shader_list = utilities.store_scene_masks()
 
@@ -198,13 +198,13 @@ def from_rizom():
 
     try:
 
-        sel_layers = lx.evalN('query sceneservice selection ? mesh')
+        sel_layers = store_check_meshes()
 
         uvmap_name = utilities.store_selected_uvmap()
-        if not uvmap_name or not sel_layers:
+        if not uvmap_name:
             lx.eval('dialog.setup style:Error')
             lx.eval('dialog.title {Invalid Selection}')
-            lx.eval('dialog.msg {You need to select the meshes and UV maps that will be replaced.}')
+            lx.eval('dialog.msg {You need to select the UV maps that will be replaced.}')
             lx.eval('dialog.open')
             sys.exit()
 
