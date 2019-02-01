@@ -56,8 +56,5 @@ docs/_build/
 
 # PyBuilder
 target/
-<<<<<<< Updated upstream
-=======
 
 .vscode/
->>>>>>> Stashed changes
