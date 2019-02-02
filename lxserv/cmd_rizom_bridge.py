@@ -36,7 +36,6 @@ class To_Rizom(lxu.command.BasicCommand):
         pass
 
     def basic_Execute(self, msg, flags):
-        reload(ruvb_scripts)
         ruvb_scripts.rizom_bridge.to_rizom()
 
     def cmd_Query(self, index, vaQuery):
@@ -60,7 +59,6 @@ class From_Rizom(lxu.command.BasicCommand):
         pass
 
     def basic_Execute(self, msg, flags):
-        reload(ruvb_scripts)
         ruvb_scripts.rizom_bridge.from_rizom()
 
     def cmd_Query(self, index, vaQuery):
@@ -84,7 +82,6 @@ class Rizom_Path(lxu.command.BasicCommand):
         pass
 
     def basic_Execute(self, msg, flags):
-        reload(ruvb_scripts)
         ruvb_scripts.rizom_bridge.rizom_path_update()
 
     def cmd_Query(self, index, vaQuery):
