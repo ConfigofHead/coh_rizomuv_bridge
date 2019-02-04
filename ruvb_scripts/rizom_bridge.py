@@ -144,11 +144,11 @@ def to_rizom():
         lx.eval('scene.saveAs "%s" fbx true' % EXPORTED_FILE)
 
         try:
-            cmd = '"' + rizomuv_path + '" "' + EXPORTED_FILE + '"'
+            exe_cmd = '"' + rizomuv_path + '" "' + EXPORTED_FILE + '"'
             if platform.system() == 'Windows':
-                subprocess.Popen(cmd)
+                subprocess.call(exe_cmd, shell=False)
             else:
-                subprocess.Popen(['open', '-a', rizomuv_path, '--args', EXPORTED_FILE])
+                os.system('open -W "' + rizomuv_path + '" --args -cfi "' + EXPORTED_FILE + '"')
 
         except WindowsError:
             lx.eval('dialog.setup style:Error')
